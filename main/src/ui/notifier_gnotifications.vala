@@ -174,16 +174,8 @@ namespace Dino.Ui {
         }
 
         private async Icon get_conversation_icon(Conversation conversation) throws Error {
-            CompatAvatarDrawer drawer = new CompatAvatarDrawer() {
-                model = new ViewModel.CompatAvatarPictureModel(stream_interactor).set_conversation(conversation),
-                width_request = 40,
-                height_request = 40
-            };
-            Cairo.ImageSurface surface = drawer.draw_image_surface();
-            Gdk.Pixbuf avatar = Gdk.pixbuf_get_from_surface(surface, 0, 0, surface.get_width(), surface.get_height());
-            uint8[] buffer;
-            avatar.save_to_buffer(out buffer, "png");
-            return new BytesIcon(new Bytes(buffer));
+            // Use themed icon to avoid PNG encoding crash on macOS
+            return new ThemedIcon.from_names(new string[] {"avatar-default-symbolic", "system-users-symbolic", "user-info"});
         }
     }
 }
