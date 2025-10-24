@@ -149,11 +149,15 @@ public class MessageMetaItem : ContentMetaItem {
             markup_text = Util.parse_add_markup_theme(markup_text, null, true, true, true, Util.is_dark_theme(this.label), ref theme_dependent);
         }
 
+        // Disable emoji enlargement on macOS to prevent CoreText/ImageIO crash
+        // when rendering emoji glyphs at non-standard sizes
+#if !MACOS
         int only_emoji_count = Util.get_only_emoji_count(markup_text);
         if (only_emoji_count != -1) {
             string size_str = only_emoji_count < 5 ? "xx-large" : "large";
             markup_text = @"<span size=\'$size_str\'>" + markup_text + "</span>";
         }
+#endif
 
         string dim_color = Util.is_dark_theme(this.label) ? "#BDBDBD" : "#707070";
 
