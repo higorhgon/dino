@@ -34,12 +34,12 @@ public class View : Box {
 
         encryption_widget = new EncryptionButton(stream_interactor, encryption_button);
 
+        // Use GTK's EmojiChooser (works on macOS with fontconfig fix)
         EmojiChooser chooser = new EmojiChooser();
         chooser.emoji_picked.connect((emoji) => {
             chat_text_view.text_view.buffer.insert_at_cursor(emoji, emoji.data.length);
         });
         chooser.closed.connect(do_focus);
-
         emoji_button.set_popover(chooser);
 
         file_button.tooltip_text = Util.string_if_tooltips_active(_("Send a file"));
