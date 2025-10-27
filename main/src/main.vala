@@ -31,7 +31,7 @@ void configure_macos_fonts() {
             dir.make_directory_with_parents();
         }
         
-        // Write fontconfig to reject Apple Color Emoji
+        // Write fontconfig to reject Apple Color Emoji and use Noto Color Emoji
         string fontconfig_content = """<?xml version="1.0"?>
 <!DOCTYPE fontconfig SYSTEM "fonts.dtd">
 <fontconfig>
@@ -45,6 +45,44 @@ void configure_macos_fonts() {
       </pattern>
     </rejectfont>
   </selectfont>
+  
+  <!-- Use Noto Color Emoji for emoji rendering -->
+  <match target="pattern">
+    <test qual="any" name="family">
+      <string>emoji</string>
+    </test>
+    <edit name="family" mode="prepend" binding="strong">
+      <string>Noto Color Emoji</string>
+    </edit>
+  </match>
+  
+  <!-- Fallback to Noto Color Emoji for characters not in standard fonts -->
+  <match target="pattern">
+    <test name="family">
+      <string>sans-serif</string>
+    </test>
+    <edit name="family" mode="append" binding="weak">
+      <string>Noto Color Emoji</string>
+    </edit>
+  </match>
+  
+  <match target="pattern">
+    <test name="family">
+      <string>serif</string>
+    </test>
+    <edit name="family" mode="append" binding="weak">
+      <string>Noto Color Emoji</string>
+    </edit>
+  </match>
+  
+  <match target="pattern">
+    <test name="family">
+      <string>monospace</string>
+    </test>
+    <edit name="family" mode="append" binding="weak">
+      <string>Noto Color Emoji</string>
+    </edit>
+  </match>
 </fontconfig>
 """;
         
