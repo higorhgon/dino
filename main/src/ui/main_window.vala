@@ -36,11 +36,15 @@ public class MainWindow : Adw.ApplicationWindow {
     private Config config;
 
     class construct {
-        var shortcut = new Shortcut(new KeyvalTrigger(Key.F, ModifierType.CONTROL_MASK), new CallbackAction((widget, args) => {
+        var search_callback = new CallbackAction((widget, args) => {
             ((MainWindow) widget).search_flap.reveal_flap = true;
             return false;
-        }));
+        });
+        var shortcut = new Shortcut(new KeyvalTrigger(Key.F, ModifierType.CONTROL_MASK), search_callback);
         add_shortcut(shortcut);
+        // Add CMD+F shortcut for macOS
+        var shortcut_macos = new Shortcut(new KeyvalTrigger(Key.F, ModifierType.META_MASK), search_callback);
+        add_shortcut(shortcut_macos);
     }
 
     public MainWindow(Application application, StreamInteractor stream_interactor, Database db, Config config) {

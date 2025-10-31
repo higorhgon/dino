@@ -86,7 +86,7 @@ public class ConversationViewController : Object {
             main_window.conversation_headerbar.pack_end(button);
         }
 
-        Shortcut shortcut = new Shortcut(new KeyvalTrigger(Key.U, ModifierType.CONTROL_MASK), new CallbackAction(() => {
+        var upload_callback = new CallbackAction(() => {
             if (conversation == null) return false;
             stream_interactor.get_module(FileManager.IDENTITY).is_upload_available.begin(conversation, (_, res) => {
                 if (stream_interactor.get_module(FileManager.IDENTITY).is_upload_available.end(res)) {
@@ -94,8 +94,12 @@ public class ConversationViewController : Object {
                 }
             });
             return false;
-        }));
+        });
+        Shortcut shortcut = new Shortcut(new KeyvalTrigger(Key.U, ModifierType.CONTROL_MASK), upload_callback);
         ((Gtk.Window)view.get_root()).add_shortcut(shortcut);
+        // Add CMD+U shortcut for macOS
+        Shortcut shortcut_macos = new Shortcut(new KeyvalTrigger(Key.U, ModifierType.META_MASK), upload_callback);
+        ((Gtk.Window)view.get_root()).add_shortcut(shortcut_macos);
 
         SimpleAction close_conversation_action = new SimpleAction("close-current-conversation", null);
         close_conversation_action.activate.connect(() => {
@@ -254,13 +258,14 @@ public class ConversationViewController : Object {
             return false;
         }
 
-        // Don't forward / change focus on Control / Alt
+        // Don't forward / change focus on Control / Alt / Meta (CMD on macOS)
         if (keyval == Gdk.Key.Control_L || keyval == Gdk.Key.Control_R ||
-                keyval == Gdk.Key.Alt_L || keyval == Gdk.Key.Alt_R) {
+                keyval == Gdk.Key.Alt_L || keyval == Gdk.Key.Alt_R ||
+                keyval == Gdk.Key.Meta_L || keyval == Gdk.Key.Meta_R) {
             return false;
         }
-        // Don't forward / change focus on Control + ...
-        if ((state & ModifierType.CONTROL_MASK) > 0) {
+        // Don't forward / change focus on Control + ... or Meta + ... (CMD on macOS)
+        if ((state & ModifierType.CONTROL_MASK) > 0 || (state & ModifierType.META_MASK) > 0) {
             return false;
         }
 

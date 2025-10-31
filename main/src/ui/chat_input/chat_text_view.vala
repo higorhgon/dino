@@ -140,6 +140,37 @@ public class ChatTextView : Box {
     }
 
     private bool on_text_input_key_press(EventControllerKey controller, uint keyval, uint keycode, Gdk.ModifierType state) {
+        // Handle CMD+C/V/X/A on macOS by converting META to CONTROL
+        if ((state & ModifierType.META_MASK) > 0) {
+            if (keyval in new uint[]{ Key.c, Key.v, Key.x, Key.a, Key.z }) {
+                // Get text buffer
+                var buffer = text_view.buffer;
+                
+                if (keyval == Key.c) {
+                    // Copy
+                    buffer.copy_clipboard(text_view.get_clipboard());
+                    return true;
+                } else if (keyval == Key.v) {
+                    // Paste
+                    buffer.paste_clipboard(text_view.get_clipboard(), null, true);
+                    return true;
+                } else if (keyval == Key.x) {
+                    // Cut
+                    buffer.cut_clipboard(text_view.get_clipboard(), true);
+                    return true;
+                } else if (keyval == Key.a) {
+                    // Select all
+                    TextIter start, end;
+                    buffer.get_bounds(out start, out end);
+                    buffer.select_range(start, end);
+                    return true;
+                } else if (keyval == Key.z) {
+                    // Undo - let GTK handle it with modified state
+                    return false;
+                }
+            }
+        }
+        
         // Enter pressed -> Send message (except if it was Shift+Enter)
         if (keyval in new uint[]{ Key.Return, Key.KP_Enter }) {
             // Allow the text view to process the event. Needed for IME.
@@ -161,7 +192,9 @@ public class ChatTextView : Box {
         }
 
         // Style text section bold (CTRL + b) or italic (CTRL + i)
-        if ((state & ModifierType.CONTROL_MASK) > 0) {
+        // On macOS, also support CMD key (META_MASK)
+        bool is_modifier = ((state & ModifierType.CONTROL_MASK) > 0) || ((state & ModifierType.META_MASK) > 0);
+        if (is_modifier) {
             if (keyval in new uint[]{ Key.i, Key.b }) {
                 TextIter start_selection, end_selection;
                 text_view.buffer.get_selection_bounds(out start_selection, out end_selection);
